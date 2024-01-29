@@ -1,5 +1,137 @@
 ---
-title: "Untitled"
+title: "Mixed models: theory and application"
 format: revealjs
 ---
 
+```{r}
+
+library(tidyverse)
+library(lme4)
+library(brms)
+library(emmeans)
+library(faux)
+library(modelr)
+
+set.seed(90095)
+
+data_1 <- tibble(
+  x1 = 1:100,
+  x2 = rbinom(100, size = 1, prob = 0.5),
+  y1 = rnorm(100, mean = 10, sd = 1),
+  y2 = 0.5 * x1 + rnorm(100, mean = 0, sd = 10),
+  y3 = x2 + rnorm(100, mean = 0, sd = .5)
+)
+
+data_2 <- tibble(
+  x = 1:20
+) %>% 
+  add_random(sub_id=10) %>%
+  add_ranef("sub_id",u0s=10, u1s=1, .cors=.2) %>%
+  add_ranef(error=10) %>% 
+  mutate(
+    y = (5+u1s) * x + u0s + error
+  )
+
+partial_pool <- lmer(y ~ x + (1 + x | sub_id), data=data_2)
+data_2 %>% add_predictions(partial_pool) -> data_2
+
+```
+
+## Load in packages
+
+```r
+library(tidyverse)
+library(lme4)
+library(brms)
+library(emmeans)
+
+set.seed(90095)
+```
+
+---
+
+## The linear model
+
+
+## y = α + ϵ
+```{r}
+p1 <- data_1 %>% 
+ggplot(aes(x=x1,y=y1))+
+geom_point(size=3) +
+theme_minimal() +
+xlab('X') + 
+ylab('Y')
+
+p1
+```
+
+## y = α + ϵ
+```{r}
+p1 +
+geom_smooth(method='lm', formula = y ~ 1)
+```
+
+## y = α + β*x + ϵ (continuous)
+```{r}
+p2 <- data_1 %>% 
+ggplot(aes(x=x1,y=y2))+
+geom_point(size=3) +
+theme_minimal() +
+xlab('X') + 
+ylab('Y')
+
+p2
+```
+
+## y = α + β*x + ϵ (continuous)
+```{r}
+p2 + geom_smooth(method='lm', formula=y~1+x)
+```
+
+## y = α + β*x + ϵ (categorical)
+```{r}
+p3 <- data_1 %>% 
+ggplot(aes(x=x2,y=y3))+
+geom_point(size=3) +
+theme_minimal() +
+xlab('X') + 
+ylab('Y')
+
+p3
+```
+
+## y = α + β*x + ϵ (categorical)
+
+```{r}
+p3 + geom_smooth(method='lm')
+```
+
+## But sometimes our data is clustered...
+```{r}
+p4 <- data_2 %>% 
+  ggplot(
+    aes(
+      x=x,y=y,color=factor(sub_id)
+    )
+  ) +
+  geom_point() +
+  theme_minimal()
+
+p4
+```
+
+## Full pooling
+```{r}
+p4 +
+geom_smooth(aes(group='none'),color='blue',method='lm',formula=y ~ 1 + x)
+```
+
+## No pooling
+```{r}
+p4 + geom_smooth(method='lm',se=F)
+```
+
+## ...Partial pooling
+```{r}
+p4 + geom_smooth(aes(y=pred),method='lm')
+```

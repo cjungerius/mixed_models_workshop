@@ -14,6 +14,9 @@ library(brms)
 library(emmeans)
 library(faux)
 library(modelr)
+library(patchwork)
+library(ggbeeswarm)
+library(tidybayes)
 
 set.seed(90095)
 
@@ -35,44 +38,86 @@ data_2 <- tibble(
     y = (5+u1s) * x + u0s + error
   )
 
-# Select the first 3 rows for the participant of interest
-data_2_participant <- data_2 %>%
-  filter(sub_id == "sub_id03") %>%
-  slice_sample(n = 2)
+mixed_example <- lmer(y~x+(x|sub_id),data=data_2)
 
-# Select the rows for the other participants
-data_2_others <- data_2 %>%
-  filter(sub_id != "sub_id03")
+data_2 <- data_2 %>% add_predictions(mixed_example)
 
-# Combine the two data frames
-data_3 <- bind_rows(data_2_participant, data_2_others)
+data <- readRDS("mixed_model_data.rds")
+no_pool_b <- readRDS("no_pool_b.rds")
+ppool_b <- readRDS("ppool_b.rds")
 
+```
 
-partial_pool <- lmer(y ~ x + (1 + x | sub_id), data=data_2)
-partial_pool_2 <- lmer(y ~ x + (1 + x | sub_id), data=data_3)
+```{r}
+m_nopool <- lm(y ~ x*sub,data=data)
+m_ppool <- lmer(y~ 1 + x + (1 + x | sub),data=data)
 
-no_pool <- lm(y~x*sub_id,data=data_2)
-no_pool_2 <- lm(y~x*sub_id,data=data_3)
+data_pred <- data %>% 
+  data_grid(sub,x) %>% 
+  spread_predictions(m_nopool,m_ppool)
 
-data_2 %>% add_predictions(partial_pool) -> data_2
+p_data <- data %>% 
+  ggplot(
+    aes(x=x,y=y,color=sub)
+  ) +
+  geom_beeswarm(size=3) +
+  theme_bw() +
+  guides(color='none')+
+  facet_grid(.~sub)
 
+p_nopool <- data_pred %>% 
+  ggplot(
+    aes(x=x,y=m_nopool,color=sub)
+  ) +
+  stat_summary(fun='mean',geom='point')+
+  stat_summary(geom='line',fun='mean',group='none')+
+  theme_bw()+
+  guides(color='none')+
+  facet_grid(.~sub)
+
+p_ppool <- data_pred %>% 
+  ggplot(
+    aes(x=x,y=m_ppool,color=sub)
+  ) +
+  stat_summary(fun='mean',geom='point')+
+  stat_summary(geom='line',fun='mean',group='none')+
+  theme_bw()+
+  guides(color='none')+
+  facet_grid(.~sub)
+
+p_bayes_coefs <- data %>% 
+  data_grid(sub,x) %>% 
+  add_predicted_draws(no_pool_b, value="nopool") %>% 
+  group_by(sub,x) %>% 
+  median_hdi(.simple_names=F) %>% 
+  add_predicted_draws(ppool_b, value="ppool") %>% 
+  median_hdi(.simple_names=F) %>% 
+  ggplot(
+    aes(y=interaction(x,sub))
+  ) +
+  geom_point(aes(x=nopool),position=position_nudge(y=.1)) +
+  geom_errorbar(aes(x=nopool,xmin=nopool.lower,xmax=nopool.upper),width=0,position=position_nudge(y=.1))+
+  geom_point(aes(x=ppool),color='red',position=position_nudge(y=-.1))+
+  geom_errorbar(aes(x=ppool,xmin=ppool.lower,xmax=ppool.upper),width=0,color='red',position=position_nudge(y=-.1))
+
+p_data
+```
+
+##
+
+```{r}
+p_nopool
+```
+
+##
+```{r}
+p_ppool
 ```
 
 ## What's a mixed model?
 ![](mmmeme.jpeg){fig-align="center"}
 
-## Load in packages
 
-```r
-library(tidyverse)
-library(lme4)
-library(brms)
-library(emmeans)
-
-set.seed(90095)
-```
-
----
 
 ## The linear model
 $$ 
@@ -152,6 +197,10 @@ p3
 
 ## $y = \alpha + \beta x + \epsilon$ (categorical)
 
+```r
+lm(y ~ 1 + x, data=df)
+```
+
 ```{r}
 p3 + geom_smooth(method='lm')
 ```
@@ -175,12 +224,17 @@ p4 <- data_2 %>%
     )
   ) +
   geom_point() +
-  theme_minimal()
+  theme_minimal() +
+  guides(color='none', fill='none')
 
 p4
 ```
 
 ## Full pooling
+
+```r
+lm(y ~ 1 + x, data=df)
+```
 ```{r}
 p4 +
 geom_smooth(aes(group='none'),color='blue',method='lm',formula=y ~ 1 + x)
@@ -192,6 +246,11 @@ geom_smooth(aes(group='none'),color='blue',method='lm',formula=y ~ 1 + x)
 
 
 ## No pooling
+
+```r
+lm(y ~ 1 + x + subj + x:subj, data=df) #or y ~ 1 + x * subj
+```
+
 ```{r}
 p4 + geom_smooth(method='lm',se=F)
 ```
@@ -204,6 +263,7 @@ addresses variability, but...
 
 :::{.incremental}
 - less powerful: estimating a different intercept & slope for each group increases df
+- likely to overfit to sample
 - if clusters are of unequal size, some estimates are better informed than others
 - sensitive to outliers
 - unclear how results generalise to e.g., population
@@ -212,8 +272,30 @@ addresses variability, but...
 
 ## The solution: partial pooling
 
+:::{.incremental}
+:::
 
 ## ...Partial pooling
 ```{r}
 p4 + geom_smooth(aes(y=pred),method='lm')
+```
+
+## Now it's your turn!
+
+Open Rstudio!
+
+## Load in packages
+
+```r
+library(tidyverse)
+library(lme4)
+library(brms)
+library(emmeans)
+
+set.seed(90095)
+```
+
+## Get data from my repo:
+
+```r
 ```

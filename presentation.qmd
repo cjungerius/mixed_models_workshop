@@ -17,6 +17,7 @@ library(modelr)
 library(patchwork)
 library(ggbeeswarm)
 library(tidybayes)
+library(knitr)
 
 set.seed(90095)
 
@@ -289,7 +290,6 @@ Open Rstudio!
 ```r
 library(tidyverse)
 library(lme4)
-library(brms)
 library(emmeans)
 
 set.seed(90095)
@@ -298,4 +298,17 @@ set.seed(90095)
 ## Get data from my repo:
 
 ```r
+data <- readRDS(url("http://tinyurl.com/mixedmodeldata"))
+```
+
+## Let's take a look at the data
+
+```r
+view(data)
+```
+
+## Let's take a look at the data
+
+```{r}
+kable(data)
 ```

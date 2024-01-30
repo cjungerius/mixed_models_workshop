@@ -1,6 +1,9 @@
 ---
 title: "Mixed models: theory and application"
 format: revealjs
+author: Chris Jungerius
+date: 2024/01/30
+date-format: "MMM D, YYYY"
 ---
 
 ```{r}
@@ -32,10 +35,31 @@ data_2 <- tibble(
     y = (5+u1s) * x + u0s + error
   )
 
+# Select the first 3 rows for the participant of interest
+data_2_participant <- data_2 %>%
+  filter(sub_id == "sub_id03") %>%
+  slice_sample(n = 2)
+
+# Select the rows for the other participants
+data_2_others <- data_2 %>%
+  filter(sub_id != "sub_id03")
+
+# Combine the two data frames
+data_3 <- bind_rows(data_2_participant, data_2_others)
+
+
 partial_pool <- lmer(y ~ x + (1 + x | sub_id), data=data_2)
+partial_pool_2 <- lmer(y ~ x + (1 + x | sub_id), data=data_3)
+
+no_pool <- lm(y~x*sub_id,data=data_2)
+no_pool_2 <- lm(y~x*sub_id,data=data_3)
+
 data_2 %>% add_predictions(partial_pool) -> data_2
 
 ```
+
+## What's a mixed model?
+![](mmmeme.jpeg){fig-align="center"}
 
 ## Load in packages
 
@@ -51,9 +75,27 @@ set.seed(90095)
 ---
 
 ## The linear model
+$$ 
+y = \alpha + \beta x + \epsilon 
+$$
 
+. . .
 
-## y = α + ϵ
+$$
+Y = X\mathcal{B} + \epsilon
+$$
+
+. . .
+
+$$ 
+y \sim Normal(\mu, \sigma)\\
+\mu = \alpha + \beta x\\
+$$
+
+$$
+$$
+
+## $y = \alpha + \epsilon$
 ```{r}
 p1 <- data_1 %>% 
 ggplot(aes(x=x1,y=y1))+
@@ -65,13 +107,16 @@ ylab('Y')
 p1
 ```
 
-## y = α + ϵ
+## $y = \alpha + \epsilon$
+```r
+lm(y ~ 1, data=df)
+```
 ```{r}
 p1 +
 geom_smooth(method='lm', formula = y ~ 1)
 ```
 
-## y = α + β*x + ϵ (continuous)
+## $y = \alpha + \beta x + \epsilon$ (continuous)
 ```{r}
 p2 <- data_1 %>% 
 ggplot(aes(x=x1,y=y2))+
@@ -83,28 +128,43 @@ ylab('Y')
 p2
 ```
 
-## y = α + β*x + ϵ (continuous)
+## $y = \alpha + \beta x + \epsilon$ (continuous)
+
+```r
+lm(y ~ 1 + x, data=df)
+```
 ```{r}
 p2 + geom_smooth(method='lm', formula=y~1+x)
 ```
 
-## y = α + β*x + ϵ (categorical)
+## $y = \alpha + \beta x + \epsilon$ (categorical)
 ```{r}
 p3 <- data_1 %>% 
 ggplot(aes(x=x2,y=y3))+
 geom_point(size=3) +
 theme_minimal() +
 xlab('X') + 
-ylab('Y')
+ylab('Y') +
+scale_x_continuous(breaks=c(0,1), limits=c(-0.5,1.5))
 
 p3
 ```
 
-## y = α + β*x + ϵ (categorical)
+## $y = \alpha + \beta x + \epsilon$ (categorical)
 
 ```{r}
 p3 + geom_smooth(method='lm')
 ```
+
+## But sometimes our data is clustered...
+
+:::{.incremental}
+- within participants
+- within stimuli types
+- participants within groups
+- measuring at different times
+- measuring at different locations/by different people/using different materials
+:::
 
 ## But sometimes our data is clustered...
 ```{r}
@@ -126,10 +186,32 @@ p4 +
 geom_smooth(aes(group='none'),color='blue',method='lm',formula=y ~ 1 + x)
 ```
 
+. . .
+
+...ignores variability
+
+
 ## No pooling
 ```{r}
 p4 + geom_smooth(method='lm',se=F)
 ```
+
+. . .
+
+addresses variability, but...
+
+## No pooling
+
+:::{.incremental}
+- less powerful: estimating a different intercept & slope for each group increases df
+- if clusters are of unequal size, some estimates are better informed than others
+- sensitive to outliers
+- unclear how results generalise to e.g., population
+- *we can do better*
+:::
+
+## The solution: partial pooling
+
 
 ## ...Partial pooling
 ```{r}

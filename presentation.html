@@ -10,6 +10,7 @@
 <link href="presentation_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.3.450">
 
+  <meta name="author" content="Chris Jungerius">
   <title>Mixed models: theory and application</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -95,6 +96,7 @@
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="presentation_files/libs/revealjs/dist/theme/quarto.css">
+  <link rel="stylesheet" href="styles.css">
   <link href="presentation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="presentation_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="presentation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -383,6 +385,9 @@
       margin-right: 0; 
     }
   </style>
+  
+  <script src="presentation_files/libs/kePrint-0.0.1/kePrint.js"></script>
+  <link href="presentation_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -392,61 +397,2949 @@
   <h1 class="title">Mixed models: theory and application</h1>
 
 <div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Chris Jungerius 
+</div>
+</div>
 </div>
 
+  <p class="date">Jan 30, 2024</p>
 </section>
-<section id="load-in-packages" class="slide level2">
-<h2>Load in packages</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(lme4)</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(brms)</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(emmeans)</span>
-<span id="cb1-5"><a href="#cb1-5"></a></span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">set.seed</span>(<span class="dv">90095</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
+<section id="whats-a-mixed-model" class="slide level2">
+<h2>What’s a mixed model?</h2>
+
+<img data-src="mmmeme.jpeg" class="r-stretch quarto-figure-center"></section>
 <section id="the-linear-model" class="slide level2">
 <h2>The linear model</h2>
+<p><span class="math display">\[
+y = \alpha + \beta x + \epsilon
+\]</span></p>
+<div class="fragment">
+<p><span class="math display">\[
+Y = X\mathcal{B} + \epsilon
+\]</span></p>
+</div>
+<div class="fragment">
+<p><span class="math display">\[
+y \sim Normal(\mu, \sigma)\\
+\mu = \alpha + \beta x\\
+\]</span></p>
+</div>
 </section>
-<section id="y-α-ϵ" class="slide level2">
-<h2>y = α + ϵ</h2>
-
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"></section>
-<section id="y-α-ϵ-1" class="slide level2">
-<h2>y = α + ϵ</h2>
+<section id="y-alpha-epsilon" class="slide level2">
+<h2><span class="math inline">\(y = \alpha + \epsilon\)</span></h2>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"></section>
-<section id="y-α-βx-ϵ-continuous" class="slide level2">
-<h2>y = α + β*x + ϵ (continuous)</h2>
+<section id="y-alpha-epsilon-1" class="slide level2">
+<h2><span class="math inline">\(y = \alpha + \epsilon\)</span></h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section>
-<section id="y-α-βx-ϵ-continuous-1" class="slide level2">
-<h2>y = α + β*x + ϵ (continuous)</h2>
+<section id="y-alpha-beta-x-epsilon-continuous" class="slide level2">
+<h2><span class="math inline">\(y = \alpha + \beta x + \epsilon\)</span> (continuous)</h2>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-5-1.png" width="960" class="r-stretch"></section>
-<section id="y-α-βx-ϵ-categorical" class="slide level2">
-<h2>y = α + β*x + ϵ (categorical)</h2>
+<section id="y-alpha-beta-x-epsilon-continuous-1" class="slide level2">
+<h2><span class="math inline">\(y = \alpha + \beta x + \epsilon\)</span> (continuous)</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
-<section id="y-α-βx-ϵ-categorical-1" class="slide level2">
-<h2>y = α + β*x + ϵ (categorical)</h2>
+<section id="y-alpha-beta-x-epsilon-categorical" class="slide level2">
+<h2><span class="math inline">\(y = \alpha + \beta x + \epsilon\)</span> (categorical)</h2>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch"></section>
-<section id="but-sometimes-our-data-is-clustered" class="slide level2">
-<h2>But sometimes our data is clustered…</h2>
+<section id="y-alpha-beta-x-epsilon-categorical-1" class="slide level2">
+<h2><span class="math inline">\(y = \alpha + \beta x + \epsilon\)</span> (categorical)</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-8-1.png" width="960" class="r-stretch"></section>
-<section id="full-pooling" class="slide level2">
-<h2>Full pooling</h2>
+<section id="but-sometimes-our-data-is-clustered" class="slide level2">
+<h2>But sometimes our data is clustered…</h2>
+<div>
+<ul>
+<li class="fragment">within participants</li>
+<li class="fragment">within stimuli types</li>
+<li class="fragment">participants within groups</li>
+<li class="fragment">measuring at different times</li>
+<li class="fragment">measuring at different locations/by different people/using different materials</li>
+</ul>
+</div>
+</section>
+<section id="but-sometimes-our-data-is-clustered-1" class="slide level2">
+<h2>But sometimes our data is clustered…</h2>
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch"></section>
+<section id="full-pooling" class="slide level2">
+<h2>Full pooling</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch"><div class="fragment">
+<p>…ignores variability</p>
+</div>
+</section>
 <section id="no-pooling" class="slide level2">
 <h2>No pooling</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x <span class="sc">+</span> subj <span class="sc">+</span> x<span class="sc">:</span>subj, <span class="at">data=</span>df) <span class="co">#or y ~ 1 + x * subj</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch"></section>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"><div class="fragment">
+<p>addresses variability, but…</p>
+</div>
+</section>
+<section id="no-pooling-1" class="slide level2">
+<h2>No pooling</h2>
+<div>
+<ul>
+<li class="fragment">less powerful: estimating a different intercept &amp; slope for each group increases df</li>
+<li class="fragment">likely to overfit to sample</li>
+<li class="fragment">if clusters are of unequal size, some estimates are better informed than others</li>
+<li class="fragment">sensitive to outliers</li>
+<li class="fragment">unclear how results generalise to e.g., population</li>
+<li class="fragment"><em>we can do better</em></li>
+</ul>
+</div>
+</section>
+<section id="the-solution-partial-pooling" class="slide level2">
+<h2>The solution: partial pooling</h2>
+<div>
+<ul>
+<li class="fragment">compromise between full and no pooling</li>
+<li class="fragment">depend on the idea that clusters are <em>exchangeable</em></li>
+<li class="fragment">model clusters as coming from an <em>infinitely large population</em> of clusters (which doesn’t have to actually exist!)</li>
+<li class="fragment">estimate the variance of that constructed ‘population’</li>
+<li class="fragment">reduces overfitting</li>
+<li class="fragment">less sensitive to outliers</li>
+<li class="fragment">allow the clusters ‘share’ information</li>
+</ul>
+</div>
+</section>
 <section id="partial-pooling" class="slide level2">
 <h2>…Partial pooling</h2>
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"><div class="footer footer-default">
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="r-stretch"></section>
+<section id="now-its-your-turn" class="slide level2">
+<h2>Now it’s your turn!</h2>
+<p>Open Rstudio!</p>
+</section>
+<section id="load-in-packages" class="slide level2">
+<h2>Load in packages</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="fu">library</span>(emmeans)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="get-data-from-my-repo" class="slide level2">
+<h2>Get data from my repo:</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">"http://tinyurl.com/mixedmodeldata"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="lets-take-a-look-at-the-data" class="slide level2">
+<h2>Let’s take a look at the data</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">view</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="lets-take-a-look-at-the-data-1" class="slide level2">
+<h2>Let’s take a look at the data</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">view</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
+<table data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">sub</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">x</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-16.1704212</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-14.5838839</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-24.3770460</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-9.5692922</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1.5097928</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-11.7853410</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">5.6445356</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.6380141</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-7.6829191</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">25.6564122</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-10.8621778</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-32.7885240</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">13.2038370</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1.2220030</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-10.5794817</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-1.1475638</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">18.4932817</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">5.3710207</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">14.3524579</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1.4788231</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">1.1684876</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">13.8823670</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.0628168</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.6345877</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-8.2830474</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-15.2541246</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-12.9833652</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">36.4177469</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.0931646</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-3.3241560</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">12.9899592</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">26.3447565</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">34.8860715</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">36.7496640</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">33.7686458</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">15.6341988</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">23.9997020</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">37.0930682</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">11.6757922</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.4191632</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">10.9176070</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">22.1341853</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">19.1470574</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">35.6607126</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.0751405</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.8766587</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">35.2247542</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">20.4473308</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">9.1390918</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">16.6604247</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">45.3737201</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">33.5524895</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">24.0382429</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.5781926</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">16.7837489</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">40.5656931</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">3.7751687</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">18.9614536</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">18.7387503</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.4339941</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">29.2113199</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">6.0719939</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">20.3712614</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">20.2116801</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">22.2371973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">41.5039277</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.1853573</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">3.3992707</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.7385208</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.1996942</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-7.4222629</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.6451395</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">19.0615056</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.3015344</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">39.8281474</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.4523401</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">3.0301584</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">20.1875096</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.9568881</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">18.6054936</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub05</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">2.6191841</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.2253430</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">18.0044729</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">30.8529261</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">24.8246797</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">27.9556449</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">34.2972171</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">33.9542726</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">26.7361307</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">36.1179470</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">13.2519297</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">27.8727140</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.1214715</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">36.9230704</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">39.7663913</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">32.2506998</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">24.3059923</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">38.4847105</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">46.1139884</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">24.7294195</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">37.9512592</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">46.8478445</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">18.6029794</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">32.7170607</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">34.9782799</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">29.0226196</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">25.1832051</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">43.0524589</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">46.1002388</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">45.4865867</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">42.4367895</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">35.2227781</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44.2808562</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">37.8147508</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">40.9196407</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">45.7991217</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">60.8492336</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">41.2527849</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">20.5080874</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">29.9304876</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">18.5742707</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">61.8640486</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">52.2719163</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">43.8865505</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">31.8829701</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">53.9073721</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">33.5463858</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">52.2862358</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44.9532074</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">37.0130600</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">51.7250049</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">30.4521456</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">32.5494855</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">51.1058134</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">49.5066213</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">22.1102740</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">22.9101896</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">32.5213107</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">17.0562607</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">47.2906069</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.0402564</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">31.8890622</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">11.3394109</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">49.9038798</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">48.0532135</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">45.4611404</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">35.5663765</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">36.3759899</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">63.0295113</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">51.4297043</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">50.6123257</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">68.1961109</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">25.7266995</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">36.7783166</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">21.7432184</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">26.7810925</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">51.3728432</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">51.2478625</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">52.3299851</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">34.5170638</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.4983013</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-31.8936795</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">11.9038424</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">27.1969038</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">1.5074995</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-10.5173541</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">42.2529994</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">20.0279137</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">22.1997406</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">12.9808685</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">45.7685625</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">22.7156574</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">13.6838130</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">11.2805618</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">50.4724858</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">49.0470421</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">41.9479151</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">14.2248795</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">22.8181515</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44.0136372</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">39.0097078</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">39.9838352</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.8263505</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.7522096</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">41.6783337</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44.7627658</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">57.0020278</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">49.6436039</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">9.0138225</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">23.4623438</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">39.3053621</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">17.9940980</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.1447196</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">36.0832164</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">16.2491109</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">1.1021951</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">14.2825799</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">16.8243160</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">34.4736051</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">6.9162660</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">30.2007840</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">11.2696991</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">19.0531219</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">6.1799979</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-13.3772972</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">7.3125951</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-11.9328669</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.6806351</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-9.9459701</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-9.7976404</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-12.4491368</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">11.5033393</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">14.5123806</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">16.0243962</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.6963864</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.9381003</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.6322873</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.2196174</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-18.3058977</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-23.6764318</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-15.2246487</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">22.8661620</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">10.9652481</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-6.3562767</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.3464782</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.3639017</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">22.7419543</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">17.1766792</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">3.4532810</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">17.0480961</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.5448163</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">16.5676683</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">13.6344027</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-28.6094209</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-1.1520226</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">12.2370523</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">17.6985059</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">4.5559281</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">3.4025623</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">57.6467680</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">61.6913953</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">43.3030351</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">37.3352438</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">34.5235485</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">49.4571218</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">55.8774541</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">18.0425690</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">71.9908562</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">35.9689378</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">65.4445463</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">46.8615654</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">46.5578165</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">76.4782677</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">24.4928461</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">58.4783546</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">83.5924539</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">75.5004150</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">43.7740738</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">5.1687977</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-9.6275609</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.0693219</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-12.2455627</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-7.1391325</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1.8057953</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-2.2941703</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-14.8878626</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-21.7409919</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-11.2304155</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0.9121157</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-3.8237700</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-13.3946714</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">8.1185626</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-11.8482873</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-21.2908705</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">12.1052425</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-21.1824688</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-10.5496410</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">3.7803667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-10.2966512</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-3.0069229</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">8.9425052</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.8123263</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-0.4673588</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.9915439</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.8906376</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-8.4468131</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-8.4104248</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-23.4221329</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.6991008</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-3.5811632</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-4.7356797</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">4.3880985</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">32.0357495</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">32.7977451</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">30.6601260</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.5530706</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">16.8846161</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">24.1269883</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">23.9663635</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-5.5553563</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">19.8975697</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">32.2081007</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">24.3138876</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">5.4121436</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">14.7026463</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.7952392</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">15.4151704</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-7.2188591</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-38.4153222</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">3.9312817</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.8095775</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-22.8930156</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.6445194</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-15.3199855</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">2.9898231</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-18.0997964</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">17.1488716</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.5384042</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.4850054</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-27.7231023</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">3.4713970</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-4.1591277</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">11.7687108</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-4.2017885</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">32.4137816</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-10.5800437</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-7.4366057</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">2.9949267</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">11.6166970</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-13.6003907</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-18.0508255</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-21.0811859</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-11.9305349</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-15.0299689</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">9.8605571</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-25.6633001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-11.7274056</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-12.5137371</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">16.9145869</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-6.6180230</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">73.7514859</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">41.1273277</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">41.2328935</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">63.3239452</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">57.6505000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">45.2336687</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">50.9042887</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">63.3855316</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">53.3267160</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">33.4174649</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">70.9046493</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">50.7368426</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">48.4425844</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">90.2034418</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">79.3470619</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">48.6413471</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">57.9579954</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">81.5224437</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">49.7280013</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">67.3291539</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">47.8815644</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">36.4171906</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">67.9532720</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">53.9691826</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">6.7028326</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.6311571</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">7.8241773</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.5508794</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">11.9476064</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">12.0035877</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.1740573</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">7.7834888</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">19.8666060</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">29.5104400</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">-2.3009520</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-7.3593236</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-3.5428115</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">10.2555444</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">24.4318362</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">23.9379706</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">5.3467924</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">12.8586149</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.2582669</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-5.3946762</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">28.2062872</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-3.1989638</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.5966972</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">43.7463742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.3323569</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">6.4946969</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-12.7051856</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">20.2252863</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">24.3523940</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">26.7067700</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">3.3435728</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">30.7546915</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">43.8708865</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">53.4381667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">22.9291591</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">34.0526846</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-2.7013050</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">37.8869324</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">24.9035768</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">27.5834521</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">37.1611390</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.6138258</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">34.4974352</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">30.4927336</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">11.2451043</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">23.9582245</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-4.4085281</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2.3628414</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.4278490</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">40.0550610</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.2980294</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">21.3687630</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">14.8798598</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.6182433</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">5.6258071</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.2154387</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-6.2191485</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.2461367</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">25.7002071</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">15.3044591</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-8.1748226</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">20.8014406</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">17.3600798</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">26.4532748</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">49.1329570</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">53.5262092</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">60.2636337</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">31.4524995</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">15.3353785</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">43.7957256</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44.5262587</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">44.2191057</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">24.5234139</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">29.3577240</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">54.7278236</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</section>
+<section id="lets-take-a-look-at-the-data-2" class="slide level2">
+<h2>Let’s take a look at the data</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="fu">group_by</span>(sub, x) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="fu">summarise</span>(<span class="at">y=</span><span class="fu">mean</span>(y), <span class="at">n=</span><span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="lets-take-a-look-at-the-data-3" class="slide level2">
+<h2>Let’s take a look at the data</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="fu">group_by</span>(sub, x) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="fu">summarise</span>(<span class="at">y=</span><span class="fu">mean</span>(y), <span class="at">n=</span><span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
+<table data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">sub</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">x</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">y.m</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">y.sd</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-5.8300765</td>
+<td style="text-align: right;">14.177583</td>
+<td style="text-align: right;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub01</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">3.5086521</td>
+<td style="text-align: right;">10.207034</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">15.1288921</td>
+<td style="text-align: right;">11.724251</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub02</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">33.3347268</td>
+<td style="text-align: right;">6.127687</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">6.6031473</td>
+<td style="text-align: right;">6.853729</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub03</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">27.3886579</td>
+<td style="text-align: right;">9.782635</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">7.9301989</td>
+<td style="text-align: right;">9.451662</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub04</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">22.2193567</td>
+<td style="text-align: right;">11.600318</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub05</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">2.6191841</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">13.0678696</td>
+<td style="text-align: right;">9.906490</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub06</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">30.8393430</td>
+<td style="text-align: right;">4.139571</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">34.5321662</td>
+<td style="text-align: right;">8.762744</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub07</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">45.0699557</td>
+<td style="text-align: right;">7.799668</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">31.8198074</td>
+<td style="text-align: right;">12.670663</td>
+<td style="text-align: right;">24</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub08</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">51.1591150</td>
+<td style="text-align: right;">8.334186</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">3.4246115</td>
+<td style="text-align: right;">20.228869</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub09</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">30.8940763</td>
+<td style="text-align: right;">14.509514</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">11.1585617</td>
+<td style="text-align: right;">5.633882</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub10</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">36.5882588</td>
+<td style="text-align: right;">12.241331</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-4.4661530</td>
+<td style="text-align: right;">13.681207</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub11</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">11.5869154</td>
+<td style="text-align: right;">6.641803</td>
+<td style="text-align: right;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">34.4283978</td>
+<td style="text-align: right;">10.165038</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">62.1682070</td>
+<td style="text-align: right;">12.734180</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-9.2580332</td>
+<td style="text-align: right;">9.108388</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1.4853657</td>
+<td style="text-align: right;">7.589402</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">12.0227191</td>
+<td style="text-align: right;">10.601380</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">22.8618643</td>
+<td style="text-align: right;">13.007250</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-13.4661652</td>
+<td style="text-align: right;">10.199346</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">10.5950812</td>
+<td style="text-align: right;">9.425969</td>
+<td style="text-align: right;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">48.8061556</td>
+<td style="text-align: right;">8.691445</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">71.3662467</td>
+<td style="text-align: right;">11.514863</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.6591900</td>
+<td style="text-align: right;">4.928637</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">14.6670660</td>
+<td style="text-align: right;">9.373637</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">8.9564555</td>
+<td style="text-align: right;">11.105898</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub18</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">35.2579567</td>
+<td style="text-align: right;">8.669669</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-0.1597724</td>
+<td style="text-align: right;">7.151601</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub19</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">21.1238923</td>
+<td style="text-align: right;">4.936624</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">25.1672540</td>
+<td style="text-align: right;">7.168093</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sub20</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">50.0273876</td>
+<td style="text-align: right;">6.360670</td>
+<td style="text-align: right;">7</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</section>
+<section id="lets-take-a-look-at-the-data-4" class="slide level2">
+<h2>Let’s take a look at the data</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="fu">ggplot</span>(</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">color=</span>sub)</span>
+<span id="cb12-4"><a href="#cb12-4"></a>) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="fu">geom_jitter</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-15-1.png" width="960" class="r-stretch"></section>
+<section id="lets-take-a-look-at-the-data-5" class="slide level2">
+<h2>Let’s take a look at the data</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="fu">ggplot</span>(</span>
+<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">color=</span>sub)</span>
+<span id="cb13-4"><a href="#cb13-4"></a>) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="fu">geom_jitter</span>()<span class="sc">+</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="fu">facet_grid</span>(.<span class="sc">~</span>sub)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-16-1.png" width="960" class="r-stretch"></section>
+<section id="fit-our-models" class="slide level2">
+<h2>Fit our models</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>full_pool <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data=</span>df)       <span class="co"># full pooling</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>no_pool <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x <span class="sc">*</span> sub, <span class="at">data=</span>df)   <span class="co"># no pooling</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="how-do-they-look" class="slide level2">
+<h2>How do they look?</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">summary</span>(full_pool)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-49.346 -16.945  -3.104  14.880  61.204 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   10.930      1.413   7.738 7.06e-14 ***
+x1            18.069      2.037   8.868  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 21.33 on 437 degrees of freedom
+Multiple R-squared:  0.1525,    Adjusted R-squared:  0.1506 
+F-statistic: 78.64 on 1 and 437 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+<section id="how-do-they-look-1" class="slide level2">
+<h2>How do they look?</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>full_pool <span class="sc">%&gt;%</span> <span class="fu">emmeans</span>(<span class="sc">~</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> x emmean   SE  df lower.CL upper.CL
+ 0   10.9 1.41 437     8.15     13.7
+ 1   29.0 1.47 437    26.11     31.9
+
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="how-do-they-look-2" class="slide level2">
+<h2>How do they look?</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="fu">summary</span>(no_pool)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x * sub, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-35.318  -6.195  -0.364   6.097  27.208 
+
+Coefficients: (1 not defined because of singularities)
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  -5.8301     2.5055  -2.327 0.020470 *  
+x1            9.3387     4.1170   2.268 0.023841 *  
+subsub02     20.9590     5.2556   3.988 7.93e-05 ***
+subsub03     12.4332     4.1170   3.020 0.002690 ** 
+subsub04     13.7603     4.2586   3.231 0.001335 ** 
+subsub05     -0.8895    10.8348  -0.082 0.934613    
+subsub06     18.8979     5.2556   3.596 0.000364 ***
+subsub07     40.3622     3.4488  11.703  &lt; 2e-16 ***
+subsub08     37.6499     3.2748  11.497  &lt; 2e-16 ***
+subsub09      9.2547     4.6393   1.995 0.046739 *  
+subsub10     16.9886     3.8062   4.463 1.05e-05 ***
+subsub11      1.3639     3.4488   0.395 0.692704    
+subsub12     40.2585     4.6393   8.678  &lt; 2e-16 ***
+subsub13     -3.4280     3.4488  -0.994 0.320850    
+subsub14     17.8528     6.4692   2.760 0.006052 ** 
+subsub15     -7.6361     3.3704  -2.266 0.024007 *  
+subsub16     54.6362     3.6595  14.930  &lt; 2e-16 ***
+subsub17      4.1709     4.6393   0.899 0.369178    
+subsub18     14.7865     3.4488   4.287 2.27e-05 ***
+subsub19      5.6703     5.2556   1.079 0.281282    
+subsub20     30.9973     5.7409   5.399 1.15e-07 ***
+x1:subsub02   8.8671     7.4887   1.184 0.237089    
+x1:subsub03  11.4468     5.9859   1.912 0.056552 .  
+x1:subsub04   4.9504     6.2833   0.788 0.431236    
+x1:subsub05       NA         NA      NA       NA    
+x1:subsub06   8.4327     7.3171   1.152 0.249813    
+x1:subsub07   1.1991     6.1492   0.195 0.845495    
+x1:subsub08  10.0006     5.2978   1.888 0.059790 .  
+x1:subsub09  18.1307     7.3171   2.478 0.013629 *  
+x1:subsub10  16.0910     5.5476   2.901 0.003931 ** 
+x1:subsub11   6.7143     5.3707   1.250 0.211962    
+x1:subsub12  18.4011     6.4100   2.871 0.004314 ** 
+x1:subsub13   1.4047     5.4945   0.256 0.798352    
+x1:subsub14   1.5004     8.1156   0.185 0.853416    
+x1:subsub15  14.7225     5.3206   2.767 0.005919 ** 
+x1:subsub16  13.2214     5.9935   2.206 0.027955 *  
+x1:subsub17   6.9875     6.2698   1.114 0.265743    
+x1:subsub18  16.9628     5.5476   3.058 0.002380 ** 
+x1:subsub19  11.9449     7.7225   1.547 0.122711    
+x1:subsub20  15.5214     7.6730   2.023 0.043753 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 10.33 on 400 degrees of freedom
+Multiple R-squared:  0.818, Adjusted R-squared:  0.8007 
+F-statistic: 47.32 on 38 and 400 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+<section id="how-do-they-look-3" class="slide level2">
+<h2>How do they look?</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>no_pool <span class="sc">%&gt;%</span> <span class="fu">emmeans</span>(<span class="sc">~</span>x) <span class="co"># Doesn't even work because of small clusters!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> x emmean    SE  df lower.CL upper.CL
+ 0 nonEst    NA  NA       NA       NA
+ 1   29.2 0.901 400     27.5       31
+
+Results are averaged over the levels of: sub 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="how-well-do-they-fit" class="slide level2">
+<h2>How well do they fit?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="fu">add_predictions</span>(full_pool) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="fu">ggplot</span>(</span>
+<span id="cb23-4"><a href="#cb23-4"></a>  <span class="fu">aes</span>(</span>
+<span id="cb23-5"><a href="#cb23-5"></a>    <span class="at">x=</span><span class="fu">as.numeric</span>(x), <span class="at">color=</span>sub</span>
+<span id="cb23-6"><a href="#cb23-6"></a>  )</span>
+<span id="cb23-7"><a href="#cb23-7"></a>) <span class="sc">+</span></span>
+<span id="cb23-8"><a href="#cb23-8"></a><span class="fu">stat_summary</span>(<span class="fu">aes</span>(<span class="at">y=</span>y)) <span class="sc">+</span></span>
+<span id="cb23-9"><a href="#cb23-9"></a><span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">y=</span>pred),<span class="at">method=</span><span class="st">'lm'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-22-1.png" width="960" class="r-stretch"></section>
+<section id="how-well-do-they-fit-1" class="slide level2">
+<h2>How well do they fit?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="fu">add_predictions</span>(no_pool) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="fu">ggplot</span>(</span>
+<span id="cb24-4"><a href="#cb24-4"></a>  <span class="fu">aes</span>(</span>
+<span id="cb24-5"><a href="#cb24-5"></a>    <span class="at">x=</span><span class="fu">as.numeric</span>(x), <span class="at">color=</span>sub</span>
+<span id="cb24-6"><a href="#cb24-6"></a>  )</span>
+<span id="cb24-7"><a href="#cb24-7"></a>) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a><span class="fu">stat_summary</span>(<span class="fu">aes</span>(<span class="at">y=</span>y)) <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9"></a><span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">y=</span>pred),<span class="at">method=</span><span class="st">'lm'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-23-1.png" width="960" class="r-stretch"></section>
+<section id="lets-mix-it-up" class="slide level2">
+<h2>Let’s mix it up!</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>partial_pool <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> x <span class="sc">+</span> (x <span class="sc">|</span> sub), <span class="at">data=</span>df) <span class="co"># or 1 + x + (1 + x | sub)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="how-does-the-mix-up-look" class="slide level2">
+<h2>How does the mix-up look?</h2>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="fu">summary</span>(partial_pool)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: y ~ x + (x | sub)
+   Data: df
+
+REML criterion at convergence: 3375.9
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.7078 -0.6090 -0.0386  0.6204  2.6488 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr
+ sub      (Intercept) 291.9    17.085       
+          x1           18.6     4.312   0.39
+ Residual             106.3    10.308       
+Number of obs: 439, groups:  sub, 20
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)   10.537      3.921   2.687
+x1            19.024      1.439  13.225
+
+Correlation of Fixed Effects:
+   (Intr)
+x1 0.150 </code></pre>
+</div>
+</div>
+</section>
+<section id="how-does-the-mix-up-look-1" class="slide level2">
+<h2>How does the mix-up look?</h2>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>partial_pool <span class="sc">%&gt;%</span> <span class="fu">emmeans</span>(<span class="sc">~</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> x emmean   SE   df lower.CL upper.CL
+ 0   10.5 3.93 18.9     2.32     18.8
+ 1   29.6 4.38 18.9    20.40     38.7
+
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="how-well-does-the-mixup-fit" class="slide level2">
+<h2>How well does the mixup fit?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a><span class="fu">add_predictions</span>(partial_pool) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-3"><a href="#cb30-3"></a><span class="fu">ggplot</span>(</span>
+<span id="cb30-4"><a href="#cb30-4"></a>  <span class="fu">aes</span>(</span>
+<span id="cb30-5"><a href="#cb30-5"></a>    <span class="at">x=</span><span class="fu">as.numeric</span>(x), <span class="at">color=</span>sub</span>
+<span id="cb30-6"><a href="#cb30-6"></a>  )</span>
+<span id="cb30-7"><a href="#cb30-7"></a>) <span class="sc">+</span></span>
+<span id="cb30-8"><a href="#cb30-8"></a><span class="fu">stat_summary</span>(<span class="fu">aes</span>(<span class="at">y=</span>y)) <span class="sc">+</span></span>
+<span id="cb30-9"><a href="#cb30-9"></a><span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">y=</span>pred),<span class="at">method=</span><span class="st">'lm'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-27-1.png" width="960" class="r-stretch"></section>
+<section id="how-well-does-the-mixup-fit-1" class="slide level2">
+<h2>How well does the mixup fit?</h2>
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-28-1.png" width="960" class="r-stretch"></section>
+<section id="how-well-does-the-mixup-fit-2" class="slide level2">
+<h2>How well does the mixup fit?</h2>
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-29-1.png" width="960" class="r-stretch"></section>
+<section id="how-well-does-the-mixup-fit-3" class="slide level2">
+<h2>How well does the mixup fit?</h2>
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-30-1.png" width="960" class="r-stretch"></section>
+<section id="the-mixed-model" class="slide level2">
+<h2>The mixed model</h2>
+<div>
+<ul>
+<li class="fragment">recovers the parameters almost as well as the full pooling model</li>
+<li class="fragment">fits the data almost as well as the no pooling model</li>
+<li class="fragment">the ideal bias-variance trade-off!</li>
+</ul>
+</div>
+</section>
+<section id="in-addition" class="slide level2">
+<h2>In addition</h2>
+<div>
+<ul>
+<li class="fragment">These models are robust against outliers and missing data</li>
+<li class="fragment">extend to any arbitrary clustering (nested, crossed, etc.)</li>
+<li class="fragment">have a natural extension to <em>generalised</em> linear models through linking functions</li>
+</ul>
+</div>
+</section>
+<section id="some-words-of-warning" class="slide level2">
+<h2>Some words of warning:</h2>
+<div>
+<ul>
+<li class="fragment">With balanced groups and linear data, mixed models will not magically improve your inferences</li>
+<li class="fragment">These models will not always fit: singularity, non-convergence</li>
+<li class="fragment">Interpreting p-values for coefficients becomes difficult/impossible because of effective df reduction: move to differences in group means, likelihood ratio tests vs simpler models, etc. to quantify your model’s performance</li>
+</ul>
+</div>
+</section>
+<section id="the-end" class="slide level2">
+<h2>The end</h2>
+<p>…Bayesian bonus?</p>
+<div class="footer footer-default">
 
 </div>
 </section>

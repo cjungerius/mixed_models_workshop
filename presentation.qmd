@@ -4,6 +4,7 @@ format: revealjs
 author: Chris Jungerius
 date: 2024/01/30
 date-format: "MMM D, YYYY"
+css: styles.css
 ---
 
 ```{r}
@@ -18,6 +19,7 @@ library(patchwork)
 library(ggbeeswarm)
 library(tidybayes)
 library(knitr)
+library(kableExtra)
 
 set.seed(90095)
 
@@ -101,19 +103,8 @@ p_bayes_coefs <- data %>%
   geom_point(aes(x=ppool),color='red',position=position_nudge(y=-.1))+
   geom_errorbar(aes(x=ppool,xmin=ppool.lower,xmax=ppool.upper),width=0,color='red',position=position_nudge(y=-.1))
 
-p_data
 ```
 
-##
-
-```{r}
-p_nopool
-```
-
-##
-```{r}
-p_ppool
-```
 
 ## What's a mixed model?
 ![](mmmeme.jpeg){fig-align="center"}
@@ -136,9 +127,6 @@ $$
 $$ 
 y \sim Normal(\mu, \sigma)\\
 \mu = \alpha + \beta x\\
-$$
-
-$$
 $$
 
 ## $y = \alpha + \epsilon$
@@ -274,6 +262,13 @@ addresses variability, but...
 ## The solution: partial pooling
 
 :::{.incremental}
+- compromise between full and no pooling
+- depend on the idea that clusters are *exchangeable*
+- model clusters as coming from an *infinitely large population* of clusters (which doesn't have to actually exist!)
+- estimate the variance of that constructed 'population'
+- reduces overfitting
+- less sensitive to outliers
+- allow the clusters 'share' information
 :::
 
 ## ...Partial pooling
@@ -291,24 +286,260 @@ Open Rstudio!
 library(tidyverse)
 library(lme4)
 library(emmeans)
-
-set.seed(90095)
 ```
 
 ## Get data from my repo:
 
 ```r
-data <- readRDS(url("http://tinyurl.com/mixedmodeldata"))
+df <- readRDS(url("http://tinyurl.com/mixedmodeldata"))
 ```
 
 ## Let's take a look at the data
 
 ```r
-view(data)
+view(df)
 ```
 
 ## Let's take a look at the data
 
-```{r}
-kable(data)
+```r
+view(df)
 ```
+
+
+
+```{r}
+kable(data) %>% 
+scroll_box(width = "100%", height = "500px")
+```
+
+
+## Let's take a look at the data
+
+```r
+df %>% 
+group_by(sub, x) %>% 
+summarise(y=mean(y), n=n())
+```
+
+## Let's take a look at the data
+
+```r
+df %>% 
+group_by(sub, x) %>% 
+summarise(y=mean(y), n=n())
+```
+
+```{r}
+df <- data
+df %>% 
+group_by(sub, x) %>% 
+summarise(y.m=mean(y), y.sd = sd(y), n=n()) %>% 
+kable %>% 
+scroll_box(width="100%",height="500px")
+```
+
+## Let's take a look at the data
+
+```r
+df %>% 
+ggplot(
+  aes(x=x,y=y,color=sub)
+) +
+geom_jitter()
+```
+
+```{r}
+df %>% 
+ggplot(
+  aes(x=x,y=y,color=sub)
+) +
+geom_jitter()
+```
+
+## Let's take a look at the data
+
+```r
+df %>% 
+ggplot(
+  aes(x=x,y=y,color=sub)
+) +
+geom_jitter()+
+facet_grid(.~sub)
+```
+
+```{r}
+df %>% 
+ggplot(
+  aes(x=x,y=y,color=sub)
+) +
+geom_jitter()+
+facet_grid(.~sub)
+```
+
+## Fit our models
+```r
+full_pool <- lm(y ~ x, data=df)       # full pooling
+no_pool <- lm(y ~ x * sub, data=df)   # no pooling
+```
+
+```{r}
+full_pool <- lm(y ~ x, data=df)       # full pooling
+no_pool <- lm(y ~ x * sub, data=df)   # no pooling
+```
+
+## How do they look?
+
+```r
+summary(full_pool)
+```
+
+```{r}
+summary(full_pool)
+```
+
+
+## How do they look?
+
+```r
+full_pool %>% emmeans(~x)
+```
+
+```{r}
+full_pool %>% emmeans(~x)
+```
+
+## How do they look?
+
+```r
+summary(no_pool)
+```
+
+```{r}
+summary(no_pool)
+```
+
+## How do they look?
+
+```r
+no_pool %>% emmeans(~x) # Doesn't even work because of small clusters!
+```
+
+```{r}
+no_pool %>% emmeans(~x)
+```
+
+## How well do they fit?
+
+```{r}
+#| echo: true
+
+df %>%
+add_predictions(full_pool) %>% 
+ggplot(
+  aes(
+    x=as.numeric(x), color=sub
+  )
+) +
+stat_summary(aes(y=y)) +
+geom_smooth(aes(y=pred),method='lm')
+```
+
+
+## How well do they fit?
+
+```{r}
+#| echo: true
+
+df %>%
+add_predictions(no_pool) %>% 
+ggplot(
+  aes(
+    x=as.numeric(x), color=sub
+  )
+) +
+stat_summary(aes(y=y)) +
+geom_smooth(aes(y=pred),method='lm')
+```
+
+## Let's mix it up!
+
+```r
+partial_pool <- lmer(y ~ x + (x | sub), data=df) # or 1 + x + (1 + x | sub)
+```
+
+```{r}
+partial_pool <- lmer(y ~ x + (x | sub), data=df) # or 1 + x + (1 + x | sub)
+```
+
+## How does the mix-up look?
+```r
+summary(partial_pool)
+```
+```{r}
+summary(partial_pool)
+```
+
+## How does the mix-up look?
+```r
+partial_pool %>% emmeans(~x)
+```
+```{r}
+partial_pool %>% emmeans(~x)
+```
+
+## How well does the mixup fit?
+
+```{r}
+#| echo: true
+
+df %>%
+add_predictions(partial_pool) %>% 
+ggplot(
+  aes(
+    x=as.numeric(x), color=sub
+  )
+) +
+stat_summary(aes(y=y)) +
+geom_smooth(aes(y=pred),method='lm')
+```
+
+## How well does the mixup fit?
+```{r}
+p_data
+```
+## How well does the mixup fit?
+```{r}
+p_nopool
+```
+## How well does the mixup fit?
+```{r}
+p_ppool
+```
+
+
+## The mixed model
+
+:::{.incremental}
+- recovers the parameters almost as well as the full pooling model
+- fits the data almost as well as the no pooling model
+- the ideal bias-variance trade-off!
+:::
+
+## In addition
+:::{.incremental}
+- These models are robust against outliers and missing data
+- extend to any arbitrary clustering (nested, crossed, etc.)
+- have a natural extension to *generalised* linear models through linking functions
+:::
+
+
+## Some words of warning:
+:::{.incremental}
+- With balanced groups and linear data, mixed models will not magically improve your inferences
+- These models will not always fit: singularity, non-convergence
+- Interpreting p-values for coefficients becomes difficult/impossible because of effective df reduction: move to differences in group means, likelihood ratio tests vs simpler models, etc. to quantify your model's performance
+:::
+
+## The end
+...Bayesian bonus?
